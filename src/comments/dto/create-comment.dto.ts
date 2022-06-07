@@ -8,16 +8,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePostDto {
-  @ApiProperty({
-    example: 1,
-    required: true,
-  })
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
-  public authorId: number;
-
+export class CreateCommentDto {
   @ApiProperty({
     example: 'Test',
     minLength: 1,
@@ -30,15 +21,15 @@ export class CreatePostDto {
   public title: string;
 
   @ApiProperty({
-    example: 'qweweyer  gfdgdfs frwe tee ',
+    example: 'Test',
     minLength: 1,
-    maxLength: 256,
-    nullable: true,
-    required: false,
+    maxLength: 40,
+    required: true,
   })
   @IsString()
+  @IsNotEmpty()
   @Length(1, 256)
-  public text?: string;
+  public text: string;
 
   @ApiProperty({
     example: false,
@@ -46,4 +37,22 @@ export class CreatePostDto {
   })
   @IsBoolean()
   public published: boolean;
+
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  @IsNumber()
+  @IsPositive()
+  @IsNotEmpty()
+  public authorId: number;
+
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  @IsNumber()
+  @IsPositive()
+  @IsNotEmpty()
+  public postId: number;
 }

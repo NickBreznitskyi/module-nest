@@ -12,30 +12,27 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiExtraModels,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
-  ApiTags,
 } from '@nestjs/swagger';
-import { PostsService } from './posts.service';
-import { CreatePostDto, UpdatePostDto } from './dto';
-import { Post as PostType } from '@prisma/client';
+import { Comment } from '@prisma/client';
+
+import { CommentsService } from './comments.service';
+import { CreateCommentDto, UpdateCommentDto } from './dto';
 import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
 import { ApiPaginatedResponse } from '../decorators';
 
-@ApiTags('Posts')
-@Controller('posts')
-@ApiExtraModels(PaginatedResponseDto)
-export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+@Controller('comments')
+export class CommentsController {
+  constructor(private readonly commentsService: CommentsService) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  @ApiOperation({ summary: 'Create new post' })
+  @ApiOperation({ summary: 'Create new comment' })
   @ApiBody({
-    type: CreatePostDto,
+    type: CreateCommentDto,
   })
   @ApiOkResponse({
     status: 200,
@@ -43,26 +40,27 @@ export class PostsController {
       example: {
         id: 1,
         authorId: 1,
+        postId: 1,
         title: 'Test',
         text: 'Test test test test',
         published: true,
       },
     },
   })
-  create(@Body() createPostDto: CreatePostDto): Promise<PostType> {
-    return this.postsService.create(createPostDto);
+  create(@Body() createCommentDto: CreateCommentDto): Promise<Comment> {
+    return this.commentsService.create(createCommentDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  @ApiOperation({ summary: 'Get posts with filters and pagination' })
+  @ApiOperation({ summary: 'Get comments with filters and pagination' })
   @ApiQuery({
     type: PaginatedQueryDto,
   })
-  @ApiPaginatedResponse(CreatePostDto)
-  findAll(@Query() query): Promise<PaginatedResponseDto<PostType>> {
+  @ApiPaginatedResponse(CreateCommentDto)
+  findAll(@Query() query): Promise<PaginatedResponseDto<Comment>> {
     const { page, limit, ...searchObject } = query;
-    return this.postsService.findAll({
+    return this.commentsService.findAll({
       page,
       limit,
       searchObject,
@@ -71,28 +69,29 @@ export class PostsController {
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  @ApiOperation({ summary: 'Get one post' })
+  @ApiOperation({ summary: 'Get one comment' })
   @ApiOkResponse({
     status: 200,
     schema: {
       example: {
         id: 1,
         authorId: 1,
+        postId: 1,
         title: 'Test',
         text: 'Test test test test',
         published: true,
       },
     },
   })
-  findOne(@Param('id') id: string): Promise<PostType> {
-    return this.postsService.findOne(+id);
+  findOne(@Param('id') id: string): Promise<Comment> {
+    return this.commentsService.findOne(+id);
   }
 
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
-  @ApiOperation({ summary: 'Update post by Id' })
+  @ApiOperation({ summary: 'Update comment by Id' })
   @ApiBody({
-    type: UpdatePostDto,
+    type: CreateCommentDto,
   })
   @ApiOkResponse({
     status: 200,
@@ -100,6 +99,7 @@ export class PostsController {
       example: {
         id: 1,
         authorId: 1,
+        postId: 1,
         title: 'Test',
         text: 'Test test test test',
         published: true,
@@ -108,19 +108,19 @@ export class PostsController {
   })
   update(
     @Param('id') id: string,
-    @Body() updatePostDto: UpdatePostDto,
-  ): Promise<PostType> {
-    return this.postsService.update(+id, updatePostDto);
+    @Body() updateCommentDto: UpdateCommentDto,
+  ): Promise<Comment> {
+    return this.commentsService.update(+id, updateCommentDto);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  @ApiOperation({ summary: 'Soft delete post by Id' })
+  @ApiOperation({ summary: 'Soft delete comment by Id' })
   @ApiNoContentResponse({
     status: 204,
     description: 'Completed',
   })
   async remove(@Param('id') id: string) {
-    await this.postsService.remove(+id);
+    await this.commentsService.remove(+id);
   }
 }

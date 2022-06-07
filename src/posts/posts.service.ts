@@ -1,26 +1,57 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { PrismaService } from '../core';
+import { Post, Prisma } from '@prisma/client';
+import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
 
 @Injectable()
 export class PostsService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(private prismaService: PrismaService) {}
+
+  create(data: Prisma.PostCreateInput): Promise<Post> {
+    return this.prismaService.post.create({ data });
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async findAll({
+    searchObject,
+    limit,
+    page,
+  }: PaginatedQueryDto<Post>): Promise<PaginatedResponseDto<Post>> {
+    const skip = limit * (page - 1);
+    const data = await this.prismaService.post.findMany({
+      where: {
+        AND: [searchObject, { deletedAt: null }],
+      },
+
+      skip,
+      take: limit,
+    });
+
+    const totalCount = await this.prismaService.post.count({
+      where: {
+        AND: [searchObject, { deletedAt: null }],
+      },
+    });
+
+    return {
+      page,
+      limit,
+      totalCount,
+      data,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  findOne(id: number): Promise<Post> {
+    return this.prismaService.post.findUnique({ where: { id } });
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  update(id: number, data: Prisma.PostUpdateInput): Promise<Post> {
+    return this.prismaService.post.update({ where: { id }, data });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  remove(id: number): Promise<Post> {
+    return this.prismaService.post.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 }
