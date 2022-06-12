@@ -2,7 +2,6 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
-  IsPhoneNumber,
   IsPositive,
   IsString,
   Length,
@@ -10,6 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -52,7 +52,6 @@ export class CreateUserDto {
     required: true,
   })
   @IsString()
-  @IsPhoneNumber()
   @IsNotEmpty()
   public phone: string;
 
@@ -71,5 +70,7 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  readonly password: string;
+  public password: string;
+
+  public role: Role;
 }

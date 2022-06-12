@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import {
@@ -20,6 +21,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
@@ -86,19 +88,20 @@ export class UsersController {
         firstname: 'Oleg',
         lastName: 'Ivanov',
         age: 30,
+        role: 'user',
         password: 'qwerty12345',
       },
     },
   })
   findOne(@Param('id') id: string): Promise<User> {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne({ id: Number(id) });
   }
 
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
   @ApiOperation({ summary: 'Update user by Id' })
   @ApiBody({
-    type: UpdateUserDto,
+    type: CreateUserDto,
   })
   @ApiOkResponse({
     status: 200,
@@ -110,9 +113,11 @@ export class UsersController {
         lastName: 'Ivanov',
         age: 30,
         password: 'qwerty12345',
+        role: 'user',
       },
     },
   })
+  @UseGuards(AuthGuard('jwt'))
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,

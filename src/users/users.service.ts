@@ -1,5 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from '../core';
 import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
@@ -8,8 +14,24 @@ import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
 export class UsersService {
   constructor(private prismaService: PrismaService) {}
 
-  create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prismaService.user.create({ data });
+  async create(data: Prisma.UserCreateInput): Promise<User> {
+    const userFromDb = await this.findOne({ email: data.email });
+    if (userFromDb) {
+      throw new BadRequestException({
+        message: 'User with this data already exist',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    const hashedPass = await UsersService._hashPassword(data.password);
+    const user = await this.prismaService.user.create({
+      data: {
+        ...data,
+        password: hashedPass,
+      },
+    });
+
+    delete user.password;
+    return user;
   }
 
   async findAll({
@@ -22,7 +44,6 @@ export class UsersService {
       where: {
         AND: [searchObject, { deletedAt: null }],
       },
-
       skip,
       take: limit,
     });
@@ -40,8 +61,8 @@ export class UsersService {
     };
   }
 
-  findOne(id: number): Promise<User> {
-    return this.prismaService.user.findUnique({ where: { id } });
+  findOne(searchObj: Partial<User>): Promise<User> {
+    return this.prismaService.user.findFirst({ where: searchObj });
   }
 
   update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
@@ -53,5 +74,20 @@ export class UsersService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  async comparePassword(password: string, hash: string): Promise<void> {
+    const isPassUnique = await bcrypt.compare(password, hash);
+
+    if (!isPassUnique) {
+      throw new ForbiddenException({
+        message: 'Wrong email or password',
+        statusCode: HttpStatus.FORBIDDEN,
+      });
+    }
+  }
+
+  private static _hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, Number(process.env['HASH_SALT']));
   }
 }
