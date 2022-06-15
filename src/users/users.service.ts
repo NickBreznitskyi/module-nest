@@ -9,10 +9,15 @@ import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from '../core';
 import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
+import { S3ManagerService } from '../s3-manager/s3-manager.service';
+import { ItemTypeEnum } from '../s3-manager/enums/itemType.enum';
 
 @Injectable()
 export class UsersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private s3ManagerService: S3ManagerService,
+  ) {}
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
     const userFromDb = await this.findOne({ email: data.email });
@@ -89,5 +94,22 @@ export class UsersService {
 
   private static _hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, Number(process.env['HASH_SALT']));
+  }
+
+  async setAvatar(
+    avatar: Express.Multer.File,
+    userID: number,
+  ): Promise<Partial<User>> {
+    const uploadedFile = await this.s3ManagerService.uploadFile(
+      avatar,
+      ItemTypeEnum.USERS,
+      userID,
+    );
+
+    return this.prismaService.user.update({
+      select: { avatar: true },
+      where: { id: userID },
+      data: { avatar: uploadedFile.Location },
+    });
   }
 }

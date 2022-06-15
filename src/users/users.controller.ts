@@ -9,7 +9,10 @@ import {
   Patch,
   Post,
   Query,
+  Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import {
@@ -27,6 +30,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
 import { ApiPaginatedResponse } from '../decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @Controller('users')
@@ -98,7 +102,8 @@ export class UsersController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Patch(':id')
+  @Patch()
+  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Update user by Id' })
   @ApiBody({
     type: CreateUserDto,
@@ -118,11 +123,16 @@ export class UsersController {
     },
   })
   @UseGuards(AuthGuard('jwt'))
-  update(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ): Promise<User> {
-    return this.usersService.update(+id, updateUserDto);
+  update(@Request() req, @Body() updateUserDto: UpdateUserDto): Promise<User> {
+    return this.usersService.update(req.user.userId, updateUserDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch('/avatar')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('avatar'))
+  setAvatar(@Request() req, @UploadedFile() avatar: Express.Multer.File) {
+    return this.usersService.setAvatar(avatar, req.user.userId);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

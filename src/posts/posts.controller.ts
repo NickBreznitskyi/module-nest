@@ -9,6 +9,9 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -24,6 +27,8 @@ import { CreatePostDto, UpdatePostDto } from './dto';
 import { Post as PostType } from '@prisma/client';
 import { PaginatedQueryDto, PaginatedResponseDto } from '../dto';
 import { ApiPaginatedResponse } from '../decorators';
+import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -106,11 +111,14 @@ export class PostsController {
       },
     },
   })
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('photo'))
   update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
+    @UploadedFile() photo?: Express.Multer.File,
   ): Promise<PostType> {
-    return this.postsService.update(+id, updatePostDto);
+    return this.postsService.update(+id, updatePostDto, photo);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

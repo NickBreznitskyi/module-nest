@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsEmpty,
   IsNotEmpty,
   IsNumber,
   IsPositive,
@@ -72,5 +73,11 @@ export class CreateUserDto {
   @IsNotEmpty()
   public password: string;
 
+  @ApiProperty({
+    example: 'USER',
+    default: 'USER',
+    required: false,
+  })
+  @IsEmpty()
   public role: Role;
 }

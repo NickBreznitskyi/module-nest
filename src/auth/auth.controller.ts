@@ -115,8 +115,8 @@ export class AuthController {
     status: 401,
   })
   @UseGuards(AuthGuard('jwt'))
-  logout(@Request() res) {
-    return this.authService.logout(res.user);
+  logout(@Request() req) {
+    return this.authService.logout(req.user);
   }
 
   @HttpCode(HttpStatus.OK)

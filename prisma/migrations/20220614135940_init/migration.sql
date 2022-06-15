@@ -10,7 +10,8 @@ CREATE TABLE "User" (
     "age" INTEGER NOT NULL,
     "phone" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" "Role" NOT NULL,
+    "avatar" TEXT,
+    "role" "Role" NOT NULL DEFAULT E'USER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deletedAt" TIMESTAMP(3),
 
@@ -22,6 +23,7 @@ CREATE TABLE "Post" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "text" TEXT,
+    "photo" TEXT,
     "published" BOOLEAN DEFAULT false,
     "authorId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -48,6 +50,7 @@ CREATE TABLE "Comment" (
 CREATE TABLE "Token" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER,
+    "email" TEXT NOT NULL,
     "accessToken" TEXT NOT NULL,
     "refreshToken" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
