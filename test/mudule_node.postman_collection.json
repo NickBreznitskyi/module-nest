@@ -1,0 +1,266 @@
+{
+	"info": {
+		"_postman_id": "22f88d69-93bf-4b43-b4cb-b074bf0da98e",
+		"name": "mudule_node",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19741013"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", () => {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Type response\", () => {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.firstName).to.be.a('string');\r",
+									"    pm.expect(jsonData.lastName).to.be.a('string');\r",
+									"    pm.expect(jsonData.email).to.be.a('string');\r",
+									"    pm.expect(jsonData.phone).to.be.a('string');\r",
+									"    pm.expect(jsonData.age).to.be.a('number');\r",
+									"});\r",
+									"\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const reqPass = JSON.parse(pm.request.body).password\r",
+									"    pm.environment.set(\"userId\", jsonData.id);\r",
+									"    pm.environment.set(\"email\", jsonData.email);\r",
+									"    pm.environment.set(\"password\", reqPass);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"test2\",\r\n    \"lastName\": \"test2\",\r\n    \"age\": 22,\r\n    \"phone\": \"4274279890\",\r\n    \"email\": \"qweqwrwerr@mail.com\",\r\n    \"password\": \"Zxcv*1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server_url}}/auth/registration",
+							"host": [
+								"{{server_url}}"
+							],
+							"path": [
+								"auth",
+								"registration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check response\", () => {\r",
+									"    const jsonBody = JSON.parse(responseBody);\r",
+									"    const userId = pm.environment.get(\"userId\");\r",
+									"    const email = pm.environment.get(\"email\");\r",
+									"\r",
+									"    pm.expect(jsonBody.userId).to.eql(userId);\r",
+									"    pm.expect(jsonBody.email).to.eql(email);\r",
+									"})\r",
+									"\r",
+									"const jsonBody = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.environment.set(\"access_token\", \"Bearer \" + jsonBody.accessToken);\r",
+									"pm.environment.set(\"refresh_token\", \"Bearer \" + jsonBody.refreshToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server_url}}/auth/login",
+							"host": [
+								"{{server_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check response\", () => {\r",
+									"    const jsonBody = JSON.parse(responseBody);\r",
+									"    const userId = pm.environment.get(\"userId\");\r",
+									"    const email = pm.environment.get(\"email\");\r",
+									"\r",
+									"    pm.expect(jsonBody.userId).to.eql(userId);\r",
+									"    pm.expect(jsonBody.email).to.eql(email);\r",
+									"})\r",
+									"\r",
+									"const jsonBody = JSON.parse(responseBody);\r",
+									"\r",
+									"pm.environment.set(\"access_token\", \"Bearer \" + jsonBody.accessToken);\r",
+									"pm.environment.set(\"refresh_token\", \"Bearer \" + jsonBody.refreshToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{refresh_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server_url}}/auth/refresh",
+							"host": [
+								"{{server_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{server_url}}/auth/logout",
+							"host": [
+								"{{server_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "giveAdmin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Give role admin\", () => {\r",
+									"    const jsonBody = JSON.parse(responseBody);\r",
+									"\r",
+									"    pm.expect(jsonBody.role).to.eql(\"ADMIN\");\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server_url}}/auth/admin?secretAdminKey=admin",
+							"host": [
+								"{{server_url}}"
+							],
+							"path": [
+								"auth",
+								"admin"
+							],
+							"query": [
+								{
+									"key": "secretAdminKey",
+									"value": "admin"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
